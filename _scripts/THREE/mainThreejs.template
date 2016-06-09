@@ -1,0 +1,86 @@
+'use strict';
+
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+    var scene, camera, renderer, controls;
+    var cube;     //Custom
+
+    // selectAspect();		//sets initial aspect ratio...
+    initStandard();
+    render();
+
+// Standard Functions ==========================================================
+    function initStandard() {
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(60, WIDTH/HEIGHT, 1, 50);// https://github.com/mrdoob/three.js/issues/352
+        camera.up.set( 0, 0, 1 );   //sets z up
+        camera.position.set(0, -8, 5);
+        camera.lookAt(scene.position);
+
+        renderer = new THREE.WebGLRenderer({canvas:canvas3, antialias: true });
+        renderer.setSize(WIDTH, HEIGHT, true);
+        renderer.setClearColor( 0x333F47, 1 ); //set scene background color to black
+        // console.log(renderer.getContextAttributes());
+        // console.dir(renderer.getContext().canvas);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.maxDistance = 20;
+        controls.minDistance = 2;
+        controls.enableDamping = true;
+
+        $("#canvas3").append(renderer.domElement);
+    }
+
+    function render() {
+        requestAnimationFrame(render);  //browser API that delegates redraws to the browser at 60/sec
+        renderer.render(scene, camera);
+        controls.update();
+
+        // rotate(cube);
+    }
+
+// DOM events ==================================================================
+    $(window).resize(function(){
+        // event.preventDefault();
+        windowResize();
+    });
+
+    function windowResize() {
+        WIDTH = window.innerWidth,
+        HEIGHT = window.innerHeight;
+        renderer.setSize(WIDTH, HEIGHT);
+        camera.aspect = WIDTH / HEIGHT;
+        camera.updateProjectionMatrix();
+    }
+
+// Custom ======================================================================
+
+    function rotate(object) {
+        var SPEED = 0.01;
+        object.rotation.x -= SPEED;
+        object.rotation.y -= SPEED;
+    }
+
+    var cube = new THREE.Mesh(new THREE.CubeGeometry(2, 2, 2), new THREE.MeshLambertMaterial({color: 0x55B663}));
+    cube.translateZ(1);
+    scene.add(cube);
+
+    var pointLight = new THREE.PointLight(0xffffff);
+    pointLight.position.set(-3,-2,3);
+    scene.add(pointLight);
+
+    var pointLightHelper = new THREE.PointLightHelper( pointLight, .5 ); //http://threejs.org/docs/index.html#Reference/Extras.Helpers/GridHelper
+    scene.add( pointLightHelper );
+
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(20,20,20), new THREE.MeshLambertMaterial({color: 0xffffff}));
+    scene.add(plane);
+
+    var gridHelper = new THREE.GridHelper(10,1); //size, step
+    gridHelper.rotation.x = 1.57; //radians run from 0-6.28
+    gridHelper.translateY(.01);
+    scene.add( gridHelper );
+
+    var axisHelper = new THREE.AxisHelper( 5 );
+    axisHelper.translateZ(.02);
+    scene.add( axisHelper );
